@@ -112,9 +112,8 @@ def table_corners(img):
     corners, pool_corners = get_draw_corners(approx, img)
 
     if (len(corners) != 4):
-        print(imgfile[-10:], 'corners:', len(corners), corners)
+        print('corners:', len(corners), corners)
 
-        # pool = cv2.imread(imgfile)
         # plt.figure(figsize=(12, 4))
         # plt.subplot(121), show_image(poly_drawing)
         # plt.subplot(122), show_image(pool_corners)
