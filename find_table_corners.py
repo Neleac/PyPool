@@ -53,7 +53,7 @@ def contour_poly(table_mask):
 # draws corners as red circles on the pool image
 # return the corners as a list of pair lists, and the image
 def get_draw_corners(approx, img):
-    pool_corners = cv2.imread(img)
+    pool_corners = np.copy(img)
 
     # create the list of corners
     corners = []
@@ -121,7 +121,3 @@ def table_corners(img):
         # plt.show()
 
     return np.array(corners) # return numpy array
-
-img = cv2.imread("frame.png")
-corners = table_corners(img)
-print(corners)
