@@ -6,14 +6,14 @@ from sklearn.cluster import KMeans
 def show_image(img):
     plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
 
-def hls_filter(imgfile):
-    pool = cv2.imread(imgfile)
+def hls_filter(img):
+    #pool = cv2.imread(imgfile)
     # Convert BGR to HLS
-    pool_hls = cv2.cvtColor(pool, cv2.COLOR_BGR2HLS)
+    pool_hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 
     # define range of green color in HLS
-    lower_green = np.array([65,0,0])
-    upper_green = np.array([150,200,255])
+    lower_green = np.array([85, 0, 0])
+    upper_green = np.array([120, 255, 255])
 
     # Threshold the HLS image to get only green colors
     table_mask = cv2.inRange(pool_hls, lower_green, upper_green)
