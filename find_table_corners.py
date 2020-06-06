@@ -26,11 +26,13 @@ def hls_filter(img):
 # find contours then approximate polygon
 # returns the contour drawing, polygon drawing, and approximated points in polygon
 def contour_poly(table_mask):
+    cv2.imshow("frame", table_mask)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
     # find contours (outline of white)
     contours, _ = cv2.findContours(table_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contour_drawing = np.zeros(table_mask.shape, dtype=np.uint8)
-    cv2.drawContours(contour_drawing, contours, -1, (255), 2)
-
+    
     # find largest contour
     largest = 0
     idx = -1
@@ -42,11 +44,24 @@ def contour_poly(table_mask):
             idx = i
     contour = contours[idx]
 
+    contour_drawing = np.zeros(table_mask.shape, dtype=np.uint8)
+    cv2.drawContours(contour_drawing, contour, -1, (255), 2)
+    '''
+    cv2.imshow("frame", contour_drawing)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    '''
     # approx poly
     peri = cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
     poly_drawing = np.zeros(contour_drawing.shape, dtype=np.uint8)
     cv2.drawContours(poly_drawing, [approx], -1, (255), 5)
+
+    '''
+    cv2.imshow("frame", poly_drawing)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    '''
 
     return contour_drawing, poly_drawing, approx
 
@@ -70,7 +85,7 @@ def table_corners(img):
     table_mask, table_masked = hls_filter(img)
     contour_drawing, poly_drawing, approx = contour_poly(table_mask)
     corners, pool_corners = get_draw_corners(approx, img)
-
+    '''
     if (len(corners) != 4):
         print('corners:', len(corners), corners)
 
@@ -78,7 +93,7 @@ def table_corners(img):
         plt.subplot(121), show_image(poly_drawing)
         plt.subplot(122), show_image(pool_corners)
         plt.show()
-
+    '''
     return np.array(corners) # return numpy array
 
 img = cv2.imread("frame.png")

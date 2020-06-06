@@ -5,7 +5,7 @@ import sys
 sys.path.append("../pool_aimbot")
 
 from detect_balls import find_circles
-from find_table_corners import hls_filter
+from find_table_corners import table_corners
 
 data_dir = "/home/wangc21/datasets/pool"
 cap = cv2.VideoCapture(os.path.join(data_dir, "full_test_1.mp4"))
@@ -49,9 +49,9 @@ while cap.isOpened():
             cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
     '''
 
-    pool_hls, table_mask = hls_filter(frame)
+    corners = table_corners(frame)
 
-    cv2.imshow('frame', table_mask)
+    cv2.imshow('frame', frame)
 
     # playback speed
     #cv2.waitKey(int(1000 / fps))
