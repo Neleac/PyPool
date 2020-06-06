@@ -5,9 +5,10 @@ import sys
 sys.path.append("../pool_aimbot")
 
 from detect_balls import find_circles
+from find_table_corners import hls_filter
 
 data_dir = "/home/wangc21/datasets/pool"
-cap = cv2.VideoCapture(os.path.join(data_dir, "videos", "4_ball.mp4"))
+cap = cv2.VideoCapture(os.path.join(data_dir, "full_test_1.mp4"))
 fps = 60
 
 idx = 0
@@ -17,10 +18,7 @@ while cap.isOpened():
         print("Can't receive frame (stream end?). Exiting ...")
         break
 
-    h, w = frame.shape[0], frame.shape[1]
-    frame = frame[int(0.35 * h) : int(0.65 * h), int(0.25 * w) : int(0.75 * w)]
-    h, w = frame.shape[0], frame.shape[1]
-
+    '''
     # find and draw circles
     circles = find_circles(frame)
     if circles is not None:
@@ -31,13 +29,13 @@ while cap.isOpened():
         r1, r2 = int(ball[0]) + int(ball[2]), int(ball[1]) + int(ball[2])
         l1, l2 = max(0, l1), max(0, l2)
         r1, r2 = min(w, r1), min(h, r2)
-        '''
+
         # save bounding box region
         bbox = frame[l2 : r2, l1 : r1]
         bbox = cv2.resize(bbox, (40, 40), interpolation = cv2.INTER_AREA)
         cv2.imwrite(os.path.join(data_dir, "images", "%d.png" % idx), bbox)
         idx += 1
-        '''
+
         cv2.circle(frame, (ball[0], ball[1]), ball[2], (0, 255, 0), 2)
         cv2.circle(frame, (ball[0], ball[1]), 2, (0, 0, 255), 3)
         cv2.rectangle(frame, (l1, l2), (r1, r2), (255, 0, 0), 2)
@@ -49,13 +47,16 @@ while cap.isOpened():
             cv2.circle(frame, (i[0], i[1]), i[2], (0, 255, 0), 2)
             # draw the center of the circle
             cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
+    '''
 
+    pool_hls, table_mask = hls_filter(frame)
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', table_mask)
 
     # playback speed
     #cv2.waitKey(int(1000 / fps))
     if cv2.waitKey(1) == ord('q'):
+        #cv2.imwrite("frame.png", frame)
         break
 
 cap.release()

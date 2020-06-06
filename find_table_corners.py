@@ -9,19 +9,18 @@ def show_image(img):
 
 # filter the image by table color
 # returns the table mask and the table image
-def hls_filter(imgfile):
-    pool = cv2.imread(imgfile)
+def hls_filter(img):
     # Convert BGR to HLS
-    pool_hls = cv2.cvtColor(pool, cv2.COLOR_BGR2HLS)
+    pool_hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 
     # define range of green color in HLS
-    lower_green = np.array([65,0,0])
-    upper_green = np.array([150,200,255])
+    lower_green = np.array([85, 0, 0])
+    upper_green = np.array([120, 255, 255])
 
     # Threshold the HLS image to get only green colors
     table_mask = cv2.inRange(pool_hls, lower_green, upper_green)
     # Bitwise-AND mask and original image
-    table_masked = cv2.bitwise_and(pool, pool, mask=table_mask)
+    table_masked = cv2.bitwise_and(img, img, mask=table_mask)
     return table_mask, table_masked
 
 # find contours then approximate polygon
@@ -53,8 +52,8 @@ def contour_poly(table_mask):
 
 # draws corners as red circles on the pool image
 # return the corners as a list of pair lists, and the image
-def get_draw_corners(approx, imgfile):
-    pool_corners = cv2.imread(imgfile)
+def get_draw_corners(approx, img):
+    pool_corners = cv2.imread(img)
 
     # create the list of corners
     corners = []
@@ -103,14 +102,14 @@ def get_draw_corners(approx, imgfile):
     # make the image
     for corner in corners:
         [x,y] = corner
-        cv2.circle(pool_corners, (x, y), 30, (0,0,255), -1)
-    return corners, pool_corners
+        cv2.circle(img, (x, y), 30, (0,0,255), -1)
+    return corners, img
 
 # return 4x2 (ideally) numpy array of corners
-def table_corners(imgfile):
-    table_mask, table_masked = hls_filter(imgfile)
+def table_corners(img):
+    table_mask, table_masked = hls_filter(img)
     contour_drawing, poly_drawing, approx = contour_poly(table_mask)
-    corners, pool_corners = get_draw_corners(approx, imgfile)
+    corners, pool_corners = get_draw_corners(approx, img)
 
     if (len(corners) != 4):
         print(imgfile[-10:], 'corners:', len(corners), corners)
@@ -122,3 +121,7 @@ def table_corners(imgfile):
         # plt.show()
 
     return np.array(corners) # return numpy array
+
+img = cv2.imread("frame.png")
+corners = table_corners(img)
+print(corners)
