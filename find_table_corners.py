@@ -54,14 +54,53 @@ def contour_poly(table_mask):
 # draws corners as red circles on the pool image
 # return the corners as a list of pair lists, and the image
 def get_draw_corners(approx, imgfile):
+    pool_corners = cv2.imread(imgfile)
+
     # create the list of corners
     corners = []
     for corner in approx:
         [[x,y]] = corner
         corners.append([x,y])
 
+    if len(corners) == 5:
+        # need to remove extra
+        x_indices = []
+        y_indices = []
+        buff = 10
+        for i in range(len(corners)):
+            [x1, y1] = corners[i]
+            for j in range(i+1, len(corners)):
+                [x2, y2] = corners[j]
+                x_max = pool_corners.shape[1] - 1 - buff
+                y_max = pool_corners.shape[0] - 1 - buff
+                x_edge = (x1 < buff and x2 < buff) or (x1 > x_max and x2 > x_max)
+                y_edge = (y1 < buff and y2 < buff) or (y1 > y_max and y2 > y_max)
+                if x_edge:
+                    # both on edge (x-coord)
+                    x_indices.append(i)
+                    x_indices.append(j)
+                elif y_edge:
+                    # both on edge (y-coord)
+                    y_indices.append(i)
+                    y_indices.append(j)
+        if len(x_indices) != 0:
+            [i, j] = x_indices
+            [x1, y1] = corners[i]
+            [x2, y2] = corners[j]
+            y_avg = int((y1 + y2) / 2) # average the y-values
+            del corners[i]
+            del corners[j - 1]
+            corners.append([x1, y_avg]) # add in the avg
+        elif len(y_indices) != 0:
+            [i, j] = y_indices
+            [x1, y1] = corners[i]
+            [x2, y2] = corners[j]
+            x_avg = int((x1 + x2) / 2) # average the x-values
+            del corners[i]
+            del corners[j - 1]
+            corners.append([x_avg, y1]) # add in the avg
+
     # make the image
-    pool_corners = cv2.imread(imgfile)
     for corner in corners:
         [x,y] = corner
         cv2.circle(pool_corners, (x, y), 30, (0,0,255), -1)
@@ -74,12 +113,12 @@ def table_corners(imgfile):
     corners, pool_corners = get_draw_corners(approx, imgfile)
 
     if (len(corners) != 4):
-        print('corners:', len(corners), corners)
+        print(imgfile[-10:], 'corners:', len(corners), corners)
 
-        pool = cv2.imread(imgfile)
-        plt.figure(figsize=(12, 4))
-        plt.subplot(121), show_image(poly_drawing)
-        plt.subplot(122), show_image(pool_corners)
-        plt.show()
+        # pool = cv2.imread(imgfile)
+        # plt.figure(figsize=(12, 4))
+        # plt.subplot(121), show_image(poly_drawing)
+        # plt.subplot(122), show_image(pool_corners)
+        # plt.show()
 
     return np.array(corners) # return numpy array
