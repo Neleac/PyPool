@@ -45,17 +45,16 @@ def contour_convex_hull(table_mask_cleaned):
     contour_drawing = np.zeros(table_mask_cleaned.shape, dtype=np.uint8)
     cv2.drawContours(contour_drawing, contours, -1, (255), 2)
 
-    # find convex hull of contour (smooth the border)
-    hulls = list(map(lambda x: cv2.convexHull(x), contours))
-    # find largest hull
+    # find largest contour
     largest = 0
     idx = -1
-    for i in range(len(hulls)):
-        hull = hulls[i]
-        if (hull.shape[0] > largest):
-            largest = hull.shape[0]
+    for i in range(len(contours)):
+        contour = contours[i]
+        area = cv2.contourArea(contour)
+        if (area > largest):
+            largest = area
             idx = i
-    hulls = [hulls[idx]] # largest hull
+    hulls = [cv2.convexHull(contours[idx])] # largest hull
     hull_drawing = np.zeros(contour_drawing.shape, dtype=np.uint8)
     cv2.drawContours(hull_drawing, hulls, -1, (255), 2)
 
