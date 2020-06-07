@@ -24,13 +24,13 @@ while cap.isOpened():
     circles = find_circles(hls_mask)
     if circles is not None:
         # draw all balls
-        for i in circles[0, :]:
-            center = (i[0], i[1])
+        for circle in circles[0, :]:
+            center, radius = (circle[0], circle[1]), circle[2]
 
             # TODO: discard centers outside of table region
 
             # draw the outer circle
-            cv2.circle(frame, center, i[2], (0, 255, 0), 2)
+            cv2.circle(frame, center, radius, (0, 255, 0), 2)
             # draw the center of the circle
             cv2.circle(frame, center, 2, (0, 0, 255), 3)
 
