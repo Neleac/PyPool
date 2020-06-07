@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import os
-import sys
-sys.path.append("../pool_aimbot")
 
 from detect_balls import find_circles
 from find_table_corners import table_corners
@@ -27,10 +25,14 @@ while cap.isOpened():
     if circles is not None:
         # draw all balls
         for i in circles[0, :]:
+            center = (i[0], i[1])
+
+            # TODO: discard centers outside of table region
+
             # draw the outer circle
-            cv2.circle(frame, (i[0], i[1]), i[2], (0, 255, 0), 2)
+            cv2.circle(frame, center, i[2], (0, 255, 0), 2)
             # draw the center of the circle
-            cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
+            cv2.circle(frame, center, 2, (0, 0, 255), 3)
 
     # classify pool balls
 
