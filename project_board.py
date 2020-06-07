@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import os
 
 WIDTH = 232
 HEIGHT = 466
@@ -25,23 +24,23 @@ def compute_homography(corners):
     ordered_corners[0] = leftmost[0]
     ordered_corners[3] = leftmost[1]
 
-    # bottom-right is farthest from top-left
-    dist1 = np.linalg.norm(ordered_corners[0] - rightmost[0])
-    dist2 = np.linalg.norm(ordered_corners[0] - rightmost[1])
-    if dist1 > dist2:
-        ordered_corners[2] = rightmost[0]
-        ordered_corners[1] = rightmost[1]
-    else:
-        ordered_corners[2] = rightmost[1]
+    # selct bottom-right and top-right such that (dist(tl->tr) + dist(bl->br))
+    # is minimized
+    dist1 = np.linalg.norm(ordered_corners[0] - rightmost[0]) + np.linalg.norm(ordered_corners[3] - rightmost[1])
+    dist2 = np.linalg.norm(ordered_corners[0] - rightmost[1]) + np.linalg.norm(ordered_corners[3] - rightmost[0])
+
+    if dist1 < dist2:
         ordered_corners[1] = rightmost[0]
+        ordered_corners[2] = rightmost[1]
+    else:
+        ordered_corners[1] = rightmost[1]
+        ordered_corners[2] = rightmost[0]
 
     # Rotate so that top-left->top-right is shorter than top-left->bottom-left
     tltr = np.linalg.norm(ordered_corners[0] - ordered_corners[1])
     tlbl = np.linalg.norm(ordered_corners[0] - ordered_corners[3])
     if tltr > tlbl:
-        print(ordered_corners)
         ordered_corners = np.roll(ordered_corners, -1, axis=0)
-        print(ordered_corners)
 
     # Four corners of the overhead view
     corners_dst = np.array([[0, 0],[WIDTH, 0],[WIDTH, HEIGHT],[0, HEIGHT]])
