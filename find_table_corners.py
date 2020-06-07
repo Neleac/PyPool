@@ -26,9 +26,11 @@ def hls_filter(img):
 # find contours then approximate polygon
 # returns the contour drawing, polygon drawing, and approximated points in polygon
 def contour_poly(table_mask):
+    '''
     cv2.imshow("frame", table_mask)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    '''
 
     # find contours (outline of white)
     contours, _ = cv2.findContours(table_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -46,11 +48,13 @@ def contour_poly(table_mask):
 
     contour_drawing = np.zeros(table_mask.shape, dtype=np.uint8)
     cv2.drawContours(contour_drawing, contour, -1, (255), 2)
+    
     '''
     cv2.imshow("frame", contour_drawing)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
     '''
+
     # approx poly
     peri = cv2.arcLength(contour, True)
     approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
@@ -68,11 +72,51 @@ def contour_poly(table_mask):
 # draws corners as red circles on the pool image
 # return the corners as a list of pair lists, and the image
 def get_draw_corners(approx, img):
+    pool_corners = np.copy(img)
+
     # create the list of corners
     corners = []
     for corner in approx:
         [[x,y]] = corner
         corners.append([x,y])
+
+    if len(corners) == 5:
+        # need to remove extra
+        x_indices = []
+        y_indices = []
+        buff = 10
+        for i in range(len(corners)):
+            [x1, y1] = corners[i]
+            for j in range(i+1, len(corners)):
+                [x2, y2] = corners[j]
+                x_max = pool_corners.shape[1] - 1 - buff
+                y_max = pool_corners.shape[0] - 1 - buff
+                x_edge = (x1 < buff and x2 < buff) or (x1 > x_max and x2 > x_max)
+                y_edge = (y1 < buff and y2 < buff) or (y1 > y_max and y2 > y_max)
+                if x_edge:
+                    # both on edge (x-coord)
+                    x_indices.append(i)
+                    x_indices.append(j)
+                elif y_edge:
+                    # both on edge (y-coord)
+                    y_indices.append(i)
+                    y_indices.append(j)
+        if len(x_indices) != 0:
+            [i, j] = x_indices
+            [x1, y1] = corners[i]
+            [x2, y2] = corners[j]
+            y_avg = int((y1 + y2) / 2) # average the y-values
+            del corners[i]
+            del corners[j - 1]
+            corners.append([x1, y_avg]) # add in the avg
+        elif len(y_indices) != 0:
+            [i, j] = y_indices
+            [x1, y1] = corners[i]
+            [x2, y2] = corners[j]
+            x_avg = int((x1 + x2) / 2) # average the x-values
+            del corners[i]
+            del corners[j - 1]
+            corners.append([x_avg, y1]) # add in the avg
 
     # make the image
     for corner in corners:
@@ -85,17 +129,15 @@ def table_corners(img):
     table_mask, table_masked = hls_filter(img)
     contour_drawing, poly_drawing, approx = contour_poly(table_mask)
     corners, pool_corners = get_draw_corners(approx, img)
+
     '''
     if (len(corners) != 4):
         print('corners:', len(corners), corners)
 
-        plt.figure(figsize=(12, 4))
-        plt.subplot(121), show_image(poly_drawing)
-        plt.subplot(122), show_image(pool_corners)
-        plt.show()
+        # plt.figure(figsize=(12, 4))
+        # plt.subplot(121), show_image(poly_drawing)
+        # plt.subplot(122), show_image(pool_corners)
+        # plt.show()
     '''
-    return np.array(corners) # return numpy array
 
-img = cv2.imread("frame.png")
-corners = table_corners(img)
-print(corners)
+    return np.array(corners) # return numpy array
