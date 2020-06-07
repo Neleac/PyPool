@@ -1,6 +1,6 @@
 PYTHON = python3
 
-TEST = test_hit_finder.py
+TEST = test_find_best_shot.py
 
 test: $(TEST)
 	$(PYTHON) $^ -v
