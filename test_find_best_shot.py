@@ -1,5 +1,4 @@
 import unittest
-from board import *
 from find_best_shot import *
 
 class TestFindBestShot(unittest.TestCase):
