@@ -19,7 +19,7 @@ while cap.isOpened():
         break
 
     # find table region and corners
-    corners = table_corners(frame)
+    corners, hls_mask = table_corners(frame)
 
     # find pool balls
 
@@ -31,7 +31,7 @@ while cap.isOpened():
 
     # projection back to player view
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', hls_mask)
 
     if cv2.waitKey(1) == ord('q'):
         break

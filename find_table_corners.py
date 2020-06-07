@@ -124,4 +124,4 @@ def table_corners(img):
         # plt.subplot(224), show_image(pool_corners)
         # plt.show()
 
-    return np.array(corners) # return numpy array
+    return np.array(corners), table_mask
