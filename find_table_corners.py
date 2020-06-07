@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
 
 # display BGR image
 def show_image(img):
@@ -14,8 +13,8 @@ def hls_filter(img):
     pool_hls = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
 
     # define range of green color in HLS
-    lower_green = np.array([85, 0, 0])
-    upper_green = np.array([120, 255, 255])
+    lower_green = np.array([65, 0, 10])
+    upper_green = np.array([150, 200, 255])
 
     # Threshold the HLS image to get only green colors
     table_mask = cv2.inRange(pool_hls, lower_green, upper_green)
@@ -28,9 +27,6 @@ def hls_filter(img):
 def contour_poly(table_mask):
     # find contours (outline of white)
     contours, _ = cv2.findContours(table_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contour_drawing = np.zeros(table_mask.shape, dtype=np.uint8)
-    cv2.drawContours(contour_drawing, contours, -1, (255), 2)
-
     # find largest contour
     largest = 0
     idx = -1
@@ -41,6 +37,9 @@ def contour_poly(table_mask):
             largest = area
             idx = i
     contour = contours[idx]
+    contours = [contour]
+    contour_drawing = np.zeros(table_mask.shape, dtype=np.uint8)
+    cv2.drawContours(contour_drawing, contours, -1, (255), 2)
 
     # approx poly
     peri = cv2.arcLength(contour, True)
@@ -65,15 +64,15 @@ def get_draw_corners(approx, img):
         # need to remove extra
         x_indices = []
         y_indices = []
-        buff = 10
+        buff = 35
         for i in range(len(corners)):
             [x1, y1] = corners[i]
             for j in range(i+1, len(corners)):
                 [x2, y2] = corners[j]
                 x_max = pool_corners.shape[1] - 1 - buff
                 y_max = pool_corners.shape[0] - 1 - buff
-                x_edge = (x1 < buff and x2 < buff) or (x1 > x_max and x2 > x_max)
-                y_edge = (y1 < buff and y2 < buff) or (y1 > y_max and y2 > y_max)
+                x_edge = (x1 <= buff and x2 <= buff) or (x1 >= x_max and x2 >= x_max)
+                y_edge = (y1 <= buff and y2 <= buff) or (y1 >= y_max and y2 >= y_max)
                 if x_edge:
                     # both on edge (x-coord)
                     x_indices.append(i)
@@ -102,8 +101,8 @@ def get_draw_corners(approx, img):
     # make the image
     for corner in corners:
         [x,y] = corner
-        cv2.circle(img, (x, y), 30, (0,0,255), -1)
-    return corners, img
+        cv2.circle(pool_corners, (x, y), 30, (0,0,255), -1)
+    return corners, pool_corners
 
 # return 4x2 (ideally) numpy array of corners
 def table_corners(img):
@@ -114,9 +113,11 @@ def table_corners(img):
     if (len(corners) != 4):
         print('corners:', len(corners), corners)
 
-        # plt.figure(figsize=(12, 4))
-        # plt.subplot(121), show_image(poly_drawing)
-        # plt.subplot(122), show_image(pool_corners)
+        # plt.figure(figsize=(12, 8))
+        # plt.subplot(221), show_image(table_mask)
+        # plt.subplot(222), show_image(contour_drawing)
+        # plt.subplot(223), show_image(poly_drawing)
+        # plt.subplot(224), show_image(pool_corners)
         # plt.show()
 
     return np.array(corners) # return numpy array
