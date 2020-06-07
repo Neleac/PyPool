@@ -8,7 +8,9 @@ from find_table_corners import table_corners
 
 
 test_number = 1
-cap = cv2.VideoCapture("/home/wangc21/datasets/pool/full_test_%d.mp4" % test_number)
+data_dir = "/home/wangc21/datasets/pool"
+
+cap = cv2.VideoCapture(os.path.join(data_dir, "full_test_%d.mp4" % test_number))
 
 while cap.isOpened():
     ret, frame = cap.read()
