@@ -5,6 +5,7 @@ import os
 from detect_balls import find_circles
 from find_table_corners import table_corners
 from find_best_shot import *
+from project_board import *
 
 test_number = 1
 data_dir = "/home/wangc21/datasets/pool"
@@ -42,6 +43,9 @@ while cap.isOpened():
     # 3. classify pool balls
 
     # 4. homographic projection
+    h = compute_homography(corners)
+    for circle in circles[0]:
+        circle[:2] = project(circle[:2], h)
 
     # 5. shot calculation
     #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black
@@ -60,6 +64,11 @@ while cap.isOpened():
     target_pocket = point_to_np_coord(target_pocket)
 
     # 6. projection back to player view
+    target_ball = unproject(target_ball, h)
+    target_pocket = unproject(target_pocket, h)
+    
+    # 7. Draw shot
+    cv2.line(frame, target_ball, target_pocket, (0, 0, 255), 2)
 
     cv2.imshow('frame', frame)
 
