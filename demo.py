@@ -20,6 +20,11 @@ while cap.isOpened():
     # 1. find table region and corners
     corners, hls_mask = table_corners(frame)
 
+    # 1b. constrain mask to table
+    only_table_mask = np.zeros(hls_mask.shape, dtype=np.uint8)
+    cv2.fillPoly(only_table_mask, [corners], (255))
+    hls_mask = cv2.bitwise_and(hls_mask, hls_mask, mask=only_table_mask)
+
     # 2. find pool balls
     circles = find_circles(hls_mask)
     if circles is not None:
