@@ -18,9 +18,17 @@ while cap.isOpened():
         print("Can't receive frame (stream end?). Exiting ...")
         break
 
+    # create modified image
+    pool = np.copy(frame)
+
     # 1. find table region and corners
-    corners, hls_mask = table_corners(frame)
+    corners, hls_mask = table_corners(pool)
     corners = order_corners(corners)
+
+    # draw corners
+    for corner in corners:
+        [x,y] = corner
+        cv2.circle(pool, (x, y), 30, (0,0,255), -1)
 
     # 1b. constrain mask to table
     only_table_mask = np.zeros(hls_mask.shape, dtype=np.uint8)
@@ -37,9 +45,9 @@ while cap.isOpened():
             # TODO: discard centers outside of table region
 
             # draw the outer circle
-            cv2.circle(frame, center, radius, (0, 255, 0), 2)
+            cv2.circle(pool, center, radius, (0, 255, 0), 2)
             # draw the center of the circle
-            cv2.circle(frame, center, 2, (0, 0, 255), 3)
+            cv2.circle(pool, center, 2, (0, 0, 255), 3)
 
     # 3. classify pool balls
 
@@ -78,10 +86,10 @@ while cap.isOpened():
     target_pocket = unproject(target_pocket, h)
     
     # 7. Draw shot
-    cv2.line(frame, target_ball, target_pocket, (0, 0, 255), 2)  # ball -> hole
-    cv2.line(frame, None, target_ball, (0, 0, 255), 2)  # cue/white -> ball
+    cv2.line(pool, target_ball, target_pocket, (0, 0, 255), 2)  # ball -> hole
+    cv2.line(pool, None, target_ball, (0, 0, 255), 2)  # cue/white -> ball
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('pool frame', pool)
 
     if cv2.waitKey(1) == ord('q'):
         break
