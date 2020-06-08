@@ -4,7 +4,7 @@ import os
 
 from detect_balls import find_circles
 from find_table_corners import table_corners
-
+from find_best_shot import *
 
 test_number = 1
 data_dir = "/home/wangc21/datasets/pool"
@@ -17,10 +17,10 @@ while cap.isOpened():
         print("Can't receive frame (stream end?). Exiting ...")
         break
 
-    # find table region and corners
+    # 1. find table region and corners
     corners, hls_mask = table_corners(frame)
 
-    # find pool balls
+    # 2. find pool balls
     circles = find_circles(hls_mask)
     if circles is not None:
         # draw all balls
@@ -34,13 +34,27 @@ while cap.isOpened():
             # draw the center of the circle
             cv2.circle(frame, center, 2, (0, 0, 255), 3)
 
-    # classify pool balls
+    # 3. classify pool balls
 
-    # homographic projection
+    # 4. homographic projection
 
-    # shot calculation
+    # 5. shot calculation
+    #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black
+    #   output: [x, y] coordinates for a pocket and a stripes ball
+    pockets = np_coords_to_points([None])
+    stripes = np_coords_to_points([None])
+    solids = np_coords_to_points([None])
+    white = np_coord_to_point(np.array([None, None]))
+    black = np_coord_to_point(np.array([None, None]))
 
-    # projection back to player view
+    # increase last arg to allow for higher angle shots
+    target_ball, target_pocket, _ = find_closest_shot(white, black, stripes, solids, pockets, 0.01)
+
+    # shot from white -> target_ball -> target_pocket
+    target_ball = point_to_np_coord(target_ball)
+    target_pocket = point_to_np_coord(target_pocket)
+
+    # 6. projection back to player view
 
     cv2.imshow('frame', frame)
 

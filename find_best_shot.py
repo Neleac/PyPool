@@ -1,4 +1,23 @@
+import numpy as np
+
 from functools import reduce
+
+class Point:
+  def __init__(self, x, y):
+    self.x = x
+    self.y = y
+
+  def __str__(self):
+    return "Point(x=" + str(self.x) + ", y=" + str(self.y) + ")"
+
+def np_coord_to_point(coord):
+  return Point(coord[0], coord[1])
+
+def np_coords_to_points(coords):
+  return [np_coord_to_point(c) for c in coords]
+
+def point_to_np_coord(point):
+  return np.array([point.x, point.y])
 
 # params:
 #   see find_direct_shots

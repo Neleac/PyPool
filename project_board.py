@@ -64,8 +64,8 @@ def project(coord, homography):
     return np.array([px, py])
 
 """
-    Given a projected numpy array point [x', y'] and a homography, returns
-    the original (before projection) coordinates
+    Given a projected numpy array point [x', y'] and the homography used to get
+    the projected point, returns the original (before projection) coordinates
 """
 def unproject(coord, homography):
     inverse_homography = np.linalg.inv(homography)
