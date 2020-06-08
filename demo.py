@@ -20,6 +20,7 @@ while cap.isOpened():
 
     # 1. find table region and corners
     corners, hls_mask = table_corners(frame)
+    corners = order_corners(corners)
 
     # 1b. constrain mask to table
     only_table_mask = np.zeros(hls_mask.shape, dtype=np.uint8)
@@ -46,17 +47,15 @@ while cap.isOpened():
     h = compute_homography(corners)
     for circle in circles[0]:
         circle[:2] = project(circle[:2], h)
-    for corner in corners:
-        corner = project(corner, h)
 
     # Calculate coordinates of the pockets
-    corners = order_corners(corners)
+    pockets = []
     for corner in corners:
         corner = project(corner, h)
-    pockets = np.append(corners,
-                        np.array([(corners[0] + corners[3]) / 2,
-                                (corners[1] + corners[2]) / 2]),
-                        axis=0).astype(int)
+        pockets.append(corner)
+    pockets.append(((pockets[0] + pockets[3]) / 2).astype(int))
+    pockets.append(((pockets[1] + pockets[2]) / 2).astype(int))
+    pockets = np.array(pockets)
 
     # 5. shot calculation
     #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black
