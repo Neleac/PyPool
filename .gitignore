@@ -3,3 +3,4 @@
 test.py
 *.png
 checkpoints/
+test_model.py

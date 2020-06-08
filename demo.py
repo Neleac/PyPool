@@ -16,7 +16,7 @@ while cap.isOpened():
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         break
-
+    '''
     # 1. find table region and corners
     corners, hls_mask = table_corners(frame)
 
@@ -35,9 +35,10 @@ while cap.isOpened():
             cv2.circle(frame, center, 2, (0, 0, 255), 3)
 
     # 3. classify pool balls
+    '''
 
     # 4. homographic projection
-
+    '''
     # 5. shot calculation
     #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black
     #   output: [x, y] coordinates for a pocket and a stripes ball
@@ -55,10 +56,11 @@ while cap.isOpened():
     target_pocket = point_to_np_coord(target_pocket)
 
     # 6. projection back to player view
-
+    '''
     cv2.imshow('frame', frame)
 
     if cv2.waitKey(1) == ord('q'):
+        cv2.imwrite("frame.png", frame)
         break
 
 cap.release()
