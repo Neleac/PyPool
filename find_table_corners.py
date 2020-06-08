@@ -92,7 +92,7 @@ def get_draw_corners(approx, pool_corners):
             y_avg = int((y1 + y2) / 2) # average the y-values
             del corners[i]
             del corners[j - 1]
-            corners.append([x1, y_avg]) # add in the avg
+            corners.insert(i, [x1, y_avg]) # add in the avg
         elif len(y_indices) != 0:
             [i, j] = y_indices
             [x1, y1] = corners[i]
@@ -100,7 +100,7 @@ def get_draw_corners(approx, pool_corners):
             x_avg = int((x1 + x2) / 2) # average the x-values
             del corners[i]
             del corners[j - 1]
-            corners.append([x_avg, y1]) # add in the avg
+            corners.insert(i, [x_avg, y1]) # add in the avg
 
     # make the image
     for corner in corners:
