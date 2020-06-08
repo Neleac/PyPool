@@ -20,7 +20,6 @@ while cap.isOpened():
 
     # 1. find table region and corners
     corners, hls_mask = table_corners(frame)
-    corners = order_corners(corners)
 
     # 1b. constrain mask to table
     only_table_mask = np.zeros(hls_mask.shape, dtype=np.uint8)
