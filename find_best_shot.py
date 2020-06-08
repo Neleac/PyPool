@@ -11,12 +11,16 @@ class Point:
     return "Point(x=" + str(self.x) + ", y=" + str(self.y) + ")"
 
 def np_coord_to_point(coord):
+  if coord is None:
+    return None
   return Point(coord[0], coord[1])
 
 def np_coords_to_points(coords):
   return [np_coord_to_point(c) for c in coords]
 
 def point_to_np_coord(point):
+  if point is None:
+    return None
   return np.array([point.x, point.y])
 
 # params:
@@ -47,9 +51,11 @@ def find_closest_shot(white, black, stripes, solids, pockets, eps):
 # returns:
 #   map from pocket to stripes that can be directly pocketed there
 #   to get the same but for solids, pass in stripes for solids and solids for stripes
-def find_direct_shots(white, black, stripes, solids, pockets, eps):
+def find_direct_shots(white, black, stripes, solids, pockets, eps, r):
   # print("white", str(white), "black", str(black), "stripes", [str(e) for e in stripes], "solids", [str(e) for e in solids], "pockets", [str(e) for e in pockets], "eps", eps)
   shots = {}
+  if white is None:
+    return shots
   for pocket in pockets:
     for ball1 in stripes:
       # skip if ball1 isn't on the line through white and pocket
@@ -58,13 +64,16 @@ def find_direct_shots(white, black, stripes, solids, pockets, eps):
       # skip if ball1 isn't between white and pocket
       if dist(white, pocket) < dist(ball1, pocket):
         continue
+      # skip if thte black is between white and pocket
+      if (black is not None) and (online(black, ball1, pocket, r) and dist(black, pocket) < dist(ball1, pocket)):  # black ball is anywhere between white and pocket
+        continue
       # skip if the black is between ball1 and pocket
-      if (black.x is not None) and (black and online(black, white, pocket, eps) and dist(black, pocket) < dist(white, pocket)):  # black ball is anywhere between white and pocket
+      if (black is not None) and (online(black, white, ball1, r) and dist(black, pocket) < dist(white, pocket)):
         continue
       # skip if any other balls are between ball1 and pocket or between white and ball1
       if reduce((lambda x, y: x or y), \
         [((ball2 is not ball1) \
-          and online(ball2, white, pocket, eps) \
+          and online(ball2, white, pocket, r) \
           and ((dist(ball2, pocket) < dist(ball1, pocket)) or (dist(ball2, pocket) < dist(white, pocket)))) \
           for ball2 in (solids + stripes)]):
         continue

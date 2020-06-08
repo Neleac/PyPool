@@ -10,21 +10,24 @@ from find_best_shot import *
 from project_board import *
 
 
-test_number = 1
+test_number = 3
 ckpt_epoch = 9
 player = "solid"
 
-data_dir = "/home/wangc21/datasets/pool"
+data_dir = "/Users/andriy/Documents/pool_aimbot/data/pool_data"
 model_weights = os.path.join("epoch_%d.pt" % ckpt_epoch)
 use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
+device = torch.device("cpu")
 model = ConvNet().to(device)
 model.eval()
-model.load_state_dict(torch.load(model_weights))
+model.load_state_dict(torch.load(model_weights, map_location=lambda storage, loc: storage))
 
 cap = cv2.VideoCapture(os.path.join(data_dir, "full_test_%d.mp4" % test_number))
 
+frame_num = 0
 while cap.isOpened():
+    frame_num += 1
+
     ret, frame = cap.read()
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
@@ -88,8 +91,16 @@ while cap.isOpened():
 
     # 3. homographic projection
     h = compute_homography(corners)
-    for circle in circles[0]:
-        circle[:2] = project(circle[:2], h)
+    # for circle in circles[0]:
+        # circle[:2] = project(circle[:2], h)
+    stripe_centers = [project(ball, h) for ball in stripe_centers]
+    solid_centers = [project(ball, h) for ball in solid_centers]
+    white_center = None
+    black_center = None
+    if w_x is not None and w_y is not None:
+        white_center = project(np.asarray([w_x, w_y]), h)
+    if b_x is not None and b_y is not None:
+        black_center = project(np.asarray([b_x, b_y]), h)
 
     # Calculate coordinates of the pockets
     pockets = []
@@ -105,23 +116,37 @@ while cap.isOpened():
     #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black
     #   output: [x, y] coordinates for a pocket and a stripes ball
     pockets = np_coords_to_points(pockets)
+    # stripes = np_coords_to_points(np.asarray(stripe_centers))
+    # solids = np_coords_to_points(np.asarray(solid_centers))
+    # white = np_coord_to_point(np.asarray([w_x, w_y]))
+    # black = np_coord_to_point(np.asarray([b_x, b_y]))
     stripes = np_coords_to_points(np.asarray(stripe_centers))
     solids = np_coords_to_points(np.asarray(solid_centers))
-    white = np_coord_to_point(np.asarray([w_x, w_y]))
-    black = np_coord_to_point(np.asarray([b_x, b_y]))
+    white = np_coord_to_point(white_center)
+    black = np_coord_to_point(black_center)
+
+    print("frame", frame_num)
+    for pocket in pockets:
+        print("pocket", str(pocket))
+    for stripe in stripes:
+        print("stripes", str(stripe))
+    for solid in solids:
+        print("solids", str(solid))
+    print("white", str(white))
+    print("black", str(black))
 
     # increase last arg to allow for higher angle shots
     if player == "solid":
-        target_ball, target_pocket, _ = find_closest_shot(white, black, solids, stripes, pockets, 1)
+        shots = find_direct_shots(white, black, solids, stripes, pockets, 50, 10)
+        # target_ball, target_pocket, _ = find_closest_shot(white, black, solids, stripes, pockets, 20)
     else:
-        target_ball, target_pocket, _ = find_closest_shot(white, black, stripes, solids, pockets, 0.1)
+        shots = find_direct_shots(white, black, stripes, solids, pockets, 50, 10)
+        # target_ball, target_pocket, _ = find_closest_shot(white, black, stripes, solids, pockets, 20)
 
-    if target_ball is not None and target_pocket is not None:
-
+    for pocket in shots:
         # shot from white -> target_ball -> target_pocket
-        target_ball = point_to_np_coord(target_ball)
-        target_pocket = point_to_np_coord(target_pocket)
-
+        target_pocket = point_to_np_coord(pocket)
+        target_ball = point_to_np_coord(shots[pocket])
 
         # 5. projection back to player view
         target_ball = unproject(target_ball, h)
@@ -132,6 +157,24 @@ while cap.isOpened():
         # 6. Draw shot
         cv2.line(pool, target_ball, target_pocket, (255, 255, 255), 2)  # ball -> hole
         cv2.line(pool, (w_x, w_y), target_ball, (255, 255, 255), 2)  # cue/white -> ball
+
+    # if target_ball is not None and target_pocket is not None:
+
+    #     # shot from white -> target_ball -> target_pocket
+    #     target_ball = point_to_np_coord(target_ball)
+    #     target_pocket = point_to_np_coord(target_pocket)
+
+
+    #     # 5. projection back to player view
+    #     target_ball = unproject(target_ball, h)
+    #     target_pocket = unproject(target_pocket, h)
+    #     target_ball = (target_ball[0], target_ball[1])
+    #     target_pocket = (target_pocket[0], target_pocket[1])
+
+    #     # 6. Draw shot
+    #     cv2.line(pool, target_ball, target_pocket, (255, 255, 255), 2)  # ball -> hole
+    #     cv2.line(pool, (w_x, w_y), target_ball, (255, 255, 255), 2)  # cue/white -> ball
+
 
     #cv2.line(pool, (w_x, w_y), (0, 0), (255, 0, 0), 2)
     cv2.imshow('pool frame', pool)
