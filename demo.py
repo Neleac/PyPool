@@ -56,7 +56,7 @@ while cap.isOpened():
     pockets = np.append(corners,
                         np.array([(corners[0] + corners[3]) / 2,
                                 (corners[1] + corners[2]) / 2]),
-                        axis=0)
+                        axis=0).astype(int)
 
     # 5. shot calculation
     #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black

@@ -43,7 +43,7 @@ def order_corners(corners):
     if tltr > tlbl:
         ordered_corners = np.roll(ordered_corners, -1, axis=0)
 
-    return ordered_corners
+    return ordered_corners.astype(int)
 
 """
     Given the ordered corners of an image, returns a homography matrix (numpy array)
