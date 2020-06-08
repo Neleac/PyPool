@@ -5,6 +5,7 @@ import os
 from detect_balls import find_circles
 from find_table_corners import table_corners
 from find_best_shot import *
+from project_board import *
 
 test_number = 1
 data_dir = "/home/wangc21/datasets/pool"
@@ -16,9 +17,23 @@ while cap.isOpened():
     if not ret:
         print("Can't receive frame (stream end?). Exiting ...")
         break
-    '''
+
+    # create modified image
+    pool = np.copy(frame)
+
     # 1. find table region and corners
-    corners, hls_mask = table_corners(frame)
+    corners, hls_mask = table_corners(pool)
+    corners = order_corners(corners)
+
+    # draw corners
+    for corner in corners:
+        [x,y] = corner
+        cv2.circle(pool, (x, y), 30, (0,0,255), -1)
+
+    # 1b. constrain mask to table
+    only_table_mask = np.zeros(hls_mask.shape, dtype=np.uint8)
+    cv2.fillPoly(only_table_mask, [corners], (255))
+    hls_mask = cv2.bitwise_and(hls_mask, hls_mask, mask=only_table_mask)
 
     # 2. find pool balls
     circles = find_circles(hls_mask)
@@ -30,19 +45,30 @@ while cap.isOpened():
             # TODO: discard centers outside of table region
 
             # draw the outer circle
-            cv2.circle(frame, center, radius, (0, 255, 0), 2)
+            cv2.circle(pool, center, radius, (0, 255, 0), 2)
             # draw the center of the circle
-            cv2.circle(frame, center, 2, (0, 0, 255), 3)
+            cv2.circle(pool, center, 2, (0, 0, 255), 3)
 
     # 3. classify pool balls
-    '''
 
     # 4. homographic projection
-    '''
+    h = compute_homography(corners)
+    for circle in circles[0]:
+        circle[:2] = project(circle[:2], h)
+
+    # Calculate coordinates of the pockets
+    pockets = []
+    for corner in corners:
+        corner = project(corner, h)
+        pockets.append(corner)
+    pockets.append(((pockets[0] + pockets[3]) / 2).astype(int))
+    pockets.append(((pockets[1] + pockets[2]) / 2).astype(int))
+    pockets = np.array(pockets)
+
     # 5. shot calculation
     #   input: list of [x, y] coordinates for pockets, stripes, solids, white, black
     #   output: [x, y] coordinates for a pocket and a stripes ball
-    pockets = np_coords_to_points([None])
+    pockets = np_coords_to_points(pockets)
     stripes = np_coords_to_points([None])
     solids = np_coords_to_points([None])
     white = np_coord_to_point(np.array([None, None]))
@@ -56,11 +82,16 @@ while cap.isOpened():
     target_pocket = point_to_np_coord(target_pocket)
 
     # 6. projection back to player view
-    '''
-    cv2.imshow('frame', frame)
+    target_ball = unproject(target_ball, h)
+    target_pocket = unproject(target_pocket, h)
+    
+    # 7. Draw shot
+    cv2.line(pool, target_ball, target_pocket, (0, 0, 255), 2)  # ball -> hole
+    cv2.line(pool, None, target_ball, (0, 0, 255), 2)  # cue/white -> ball
+
+    cv2.imshow('pool frame', pool)
 
     if cv2.waitKey(1) == ord('q'):
-        cv2.imwrite("frame.png", frame)
         break
 
 cap.release()

@@ -5,11 +5,12 @@ WIDTH = 232
 HEIGHT = 466
 
 """
-    Given the corners of an image, returns a homography matrix (numpy array)
-    that can be used to project coordinates in the original image to a top-down
-    view and back
+    Orders the corners in corner clockwise starting with top-left. Top-left
+    is chosen such that the top-left->bottom-left is longer than top-left->top-right
+
+    Returns the ordered corners as numpy array
 """
-def compute_homography(corners):
+def order_corners(corners):
     # Order the corner in top-left, top-right, bottom-left, bottom-right
     # Begin by sorting on x coordinate
     sorted_x = corners[np.argsort(corners[:, 0]), :]
@@ -42,11 +43,19 @@ def compute_homography(corners):
     if tltr > tlbl:
         ordered_corners = np.roll(ordered_corners, -1, axis=0)
 
+    return ordered_corners.astype(int)
+
+"""
+    Given the ordered corners of an image, returns a homography matrix (numpy array)
+    that can be used to project coordinates in the original image to a top-down
+    view and back
+"""
+def compute_homography(corners):
     # Four corners of the overhead view
     corners_dst = np.array([[0, 0],[WIDTH, 0],[WIDTH, HEIGHT],[0, HEIGHT]])
 
     # Calculate Homography
-    h, status = cv2.findHomography(ordered_corners, corners_dst)
+    h, status = cv2.findHomography(corners, corners_dst)
 
     return h
 

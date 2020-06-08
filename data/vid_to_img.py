@@ -10,11 +10,9 @@ from find_table_corners import hls_filter, table_corners
 data_dir = "/home/wangc21/datasets/pool"
 
 for n in range(16):
-
     print(n)
 
     cap = cv2.VideoCapture(os.path.join(data_dir, "videos/%d_ball.mp4" % n))
-    #fps = 60
 
     os.mkdir(os.path.join(data_dir, "images/%d_ball" % n))
 
@@ -55,28 +53,5 @@ for n in range(16):
             bbox = cv2.resize(bbox, (40, 40), interpolation = cv2.INTER_AREA)
             cv2.imwrite(os.path.join(data_dir, "images/%d_ball/%d.png" % (n, idx)), bbox)
             idx += 1
-            '''
-            cv2.circle(frame, (ball[0], ball[1]), ball[2], (0, 255, 0), 2)
-            cv2.circle(frame, (ball[0], ball[1]), 2, (0, 0, 255), 3)
-            cv2.rectangle(frame, (l1, l2), (r1, r2), (255, 0, 0), 2)
-            '''
-            '''
-            # draw all balls
-            for i in circles[0, :]:
-                # draw the outer circle
-                cv2.circle(frame, (i[0], i[1]), i[2], (0, 255, 0), 2)
-                # draw the center of the circle
-                cv2.circle(frame, (i[0], i[1]), 2, (0, 0, 255), 3)
-            '''
-
-        #cv2.imshow('frame', table_mask)
-        #cv2.imshow('frame', frame)
-
-        # playback speed
-        #cv2.waitKey(int(1000 / fps))
-        if cv2.waitKey(1) == ord('q'):
-            #cv2.imwrite("frame.png", frame)
-            break
 
     cap.release()
-    #cv2.destroyAllWindows()
