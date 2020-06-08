@@ -2,10 +2,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# display BGR image
-def show_image(img):
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-
 # filter the image by table color
 # returns the table mask and the table image
 def hls_filter(img):
@@ -53,11 +49,8 @@ def contour_poly(table_mask):
 
     return contour_drawing, poly_drawing, approx
 
-# draws corners as red circles on the pool image
-# return the corners as a list of pair lists, and the image
-def get_draw_corners(approx, pool_corners):
-    #pool_corners = np.copy(img)
-
+# return the corners as a list of pair lists
+def get_corners(approx, img):
     # create the list of corners
     corners = []
     for corner in approx:
@@ -73,8 +66,8 @@ def get_draw_corners(approx, pool_corners):
             [x1, y1] = corners[i]
             for j in range(i+1, len(corners)):
                 [x2, y2] = corners[j]
-                x_max = pool_corners.shape[1] - 1 - buff
-                y_max = pool_corners.shape[0] - 1 - buff
+                x_max = img.shape[1] - 1 - buff
+                y_max = img.shape[0] - 1 - buff
                 x_edge = (x1 <= buff and x2 <= buff) or (x1 >= x_max and x2 >= x_max)
                 y_edge = (y1 <= buff and y2 <= buff) or (y1 >= y_max and y2 >= y_max)
                 if x_edge:
@@ -102,26 +95,11 @@ def get_draw_corners(approx, pool_corners):
             del corners[j - 1]
             corners.insert(i, [x_avg, y1]) # add in the avg
 
-    # make the image
-    for corner in corners:
-        [x,y] = corner
-        cv2.circle(pool_corners, (x, y), 30, (0,0,255), -1)
-    return corners, pool_corners
+    return corners
 
 # return 4x2 (ideally) numpy array of corners
 def table_corners(img):
     table_mask, table_masked = hls_filter(img)
     contour_drawing, poly_drawing, approx = contour_poly(table_mask)
-    corners, pool_corners = get_draw_corners(approx, img)
-
-    if (len(corners) != 4):
-        print('corners:', len(corners), corners)
-
-        # plt.figure(figsize=(12, 8))
-        # plt.subplot(221), show_image(table_mask)
-        # plt.subplot(222), show_image(contour_drawing)
-        # plt.subplot(223), show_image(poly_drawing)
-        # plt.subplot(224), show_image(pool_corners)
-        # plt.show()
-
+    corners = get_corners(approx, img)
     return np.array(corners), table_mask
