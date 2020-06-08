@@ -78,7 +78,8 @@ while cap.isOpened():
     target_pocket = unproject(target_pocket, h)
     
     # 7. Draw shot
-    cv2.line(frame, target_ball, target_pocket, (0, 0, 255), 2)
+    cv2.line(frame, target_ball, target_pocket, (0, 0, 255), 2)  # ball -> hole
+    cv2.line(frame, None, target_ball, (0, 0, 255), 2)  # cue/white -> ball
 
     cv2.imshow('frame', frame)
 
