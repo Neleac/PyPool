@@ -59,7 +59,7 @@ def find_direct_shots(white, black, stripes, solids, pockets, eps):
       if dist(white, pocket) < dist(ball1, pocket):
         continue
       # skip if the black is between ball1 and pocket
-      if online(black, white, pocket, eps) and dist(black, pocket) < dist(white, pocket):  # black ball is anywhere between white and pocket
+      if black and online(black, white, pocket, eps) and dist(black, pocket) < dist(white, pocket):  # black ball is anywhere between white and pocket
         continue
       # skip if any other balls are between ball1 and pocket or between white and ball1
       if reduce((lambda x, y: x or y), \
