@@ -15,7 +15,7 @@ ckpt_epoch = 9
 player = "solid"
 
 data_dir = "/home/wangc21/datasets/pool"
-model_weights = os.path.join(data_dir, "images/checkpoints/epoch_%d.pt" % ckpt_epoch)
+model_weights = os.path.join("epoch_%d.pt" % ckpt_epoch)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 model = ConvNet().to(device)
