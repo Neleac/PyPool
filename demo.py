@@ -14,7 +14,7 @@ test_number = 3
 ckpt_epoch = 9
 player = "solid"
 
-data_dir = "/Users/andriy/Documents/pool_aimbot/data/pool_data"
+data_dir = "."
 model_weights = os.path.join("epoch_%d.pt" % ckpt_epoch)
 use_cuda = torch.cuda.is_available()
 device = torch.device("cpu")
@@ -125,15 +125,22 @@ while cap.isOpened():
     white = np_coord_to_point(white_center)
     black = np_coord_to_point(black_center)
 
-    print("frame", frame_num)
+    # draw pockets
     for pocket in pockets:
-        print("pocket", str(pocket))
-    for stripe in stripes:
-        print("stripes", str(stripe))
-    for solid in solids:
-        print("solids", str(solid))
-    print("white", str(white))
-    print("black", str(black))
+        pocket = point_to_np_coord(pocket)
+        pocket = unproject(pocket, h)
+        [x,y] = pocket
+        cv2.circle(pool, (x, y), 20, (255,0,0), -1)
+
+    # print("frame", frame_num)
+    # for pocket in pockets:
+    #     print("pocket", str(pocket))
+    # for stripe in stripes:
+    #     print("stripes", str(stripe))
+    # for solid in solids:
+    #     print("solids", str(solid))
+    # print("white", str(white))
+    # print("black", str(black))
 
     # increase last arg to allow for higher angle shots
     if player == "solid":
