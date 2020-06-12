@@ -1,5 +1,7 @@
 # PyPool - Pool Aim Bot
 
+![Cover Photo](https://github.com/21WANGC/pool_aimbot/blob/master/pool.png)
+
 The game of pool, also known as billiards or snooker, is commonly played around the world. The
 game consists of a rectangular table with 6 pockets, and 15 balls (plus cue ball) that players would
 like to send ("pot") to the pockets by hitting shots using their cue sticks. In 8-ball pool, there are 4
