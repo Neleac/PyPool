@@ -15,4 +15,4 @@ into which pocket. We imagine this being used as an Augmented Reality (AR) syste
 the player of the best shots available. We implement this project using Python, mainly utilizing the
 OpenCV and PyTorch frameworks.
 
-See PyPool.pdf for more details.
+See [PyPool.pdf](https://github.com/21WANGC/pool_aimbot/blob/master/PyPool.pdf) for more details.
